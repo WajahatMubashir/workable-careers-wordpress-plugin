@@ -1,5 +1,31 @@
+// /assets/js/workable-job-board.js
+
 jQuery(document).ready(function ($) {
-    // --- Job filter logic ---
+
+    // ========== POPULATE DEPARTMENT DROPDOWN ==========
+    function populateDepartments() {
+        var deptSelect = document.getElementById('wjb-filter-department');
+        if (deptSelect) {
+            // Remove all except first ("All Departments")
+            deptSelect.options.length = 1;
+            var depts = new Set();
+            document.querySelectorAll('.wjb-dept-title').forEach(function(h2){
+                var dept = h2.textContent.trim();
+                if (dept) depts.add(dept);
+            });
+            depts.forEach(function(dept){
+                var opt = document.createElement('option');
+                opt.value = dept;
+                opt.textContent = dept;
+                deptSelect.appendChild(opt);
+            });
+        }
+    }
+
+    // Call this once DOM is ready (and whenever jobs are re-rendered)
+    populateDepartments();
+
+    // ========== FILTERING ==========
     $('#wjb-filter-department, #wjb-filter-location').on('change', filterJobs);
     $('#wjb-job-search').on('input', filterJobs);
 
@@ -45,7 +71,7 @@ jQuery(document).ready(function ($) {
         });
     }
 
-    // --- Job detail logic ---
+    // ========== JOB DETAIL POPUP ==========
     $(document).on('click', '.wjb-view-detail-btn', function (e) {
         e.preventDefault();
         var shortcode = $(this).closest('.wjb-job-item').data('shortcode');
@@ -96,6 +122,7 @@ jQuery(document).ready(function ($) {
         });
     }
 
+    // ========== LOAD APPLICATION FORM ==========
     function loadWJBApplicationForm(shortcode) {
         var $container = $('#wjb-application-form-container');
         $container.html('<p>Loading application form…</p>');

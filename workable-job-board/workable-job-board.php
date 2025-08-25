@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Workable Job Board
  * Description: Displays job listings from Workable on your WordPress site.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Wajahat
  * License: GPL2+
  */
@@ -14,11 +14,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 // === Constants ===
 define( 'WJB_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WJB_URL', plugin_dir_url( __FILE__ ) );
-
-// === API Configuration ===
-// (Consider moving token to a settings page for security in the future!)
-// define( 'WJB_API_TOKEN', 'f7N96tHVniZSr4fa0k9M0L4ScTa8U4S8QaOf6sqZ__A' );
-// define( 'WJB_WORKABLE_SUBDOMAIN', 'tcp-software-1' );
 
 // === Includes ===
 require_once WJB_DIR . 'includes/enqueue.php';
