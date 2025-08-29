@@ -1,37 +1,79 @@
 <?php
-// API integration for Workable Job Board plugin
+// API integration for Job Board for Workable plugin
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
- * Get a list of published jobs from Workable
+ * Get a list of published jobs from Workable (with pagination)
  */
-function wjb_get_jobs() {
-	$subdomain = get_option('wjb_workable_subdomain', '');
-	$token = get_option('wjb_api_token', '');
-	$url = "https://www.workable.com/spi/v3/accounts/$subdomain/jobs";
+function wjbfw_get_jobs() {
+	$subdomain = get_option('wjbfw_workable_subdomain', '');
+	$token = get_option('wjbfw_api_token', '');
+	
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public cache refresh parameter
+	$bypass_cache = isset($_GET['wjbfw_refresh']) && $_GET['wjbfw_refresh'] === '1';
+	
+	// Check cache first (unless bypassed)
+	if (!$bypass_cache) {
+		$cached_jobs = get_transient('wjbfw_jobs_cache');
+		if ($cached_jobs !== false) {
+			return $cached_jobs;
+		}
+	}
+	
+	$all_jobs = [];
+	$url = "https://www.workable.com/spi/v3/accounts/$subdomain/jobs?limit=50";
+	
 	$args = [
 		'headers' => [
 			'Authorization' => 'Bearer ' . $token,
 			'Accept'        => 'application/json'
 		],
-		'timeout' => 15
+		'timeout' => 30 // Increased timeout for multiple requests
 	];
-	$response = wp_remote_get( $url, $args );
-	if ( is_wp_error( $response ) ) return $response;
-	$code = wp_remote_retrieve_response_code( $response );
-	if ( $code !== 200 ) return new WP_Error( 'wjb_api_error', 'Workable API error: ' . $code );
-	$body = wp_remote_retrieve_body( $response );
-	$data = json_decode( $body, true );
-	return isset( $data['jobs'] ) ? $data['jobs'] : [];
+	
+	// Fetch all pages
+	while ($url) {
+		$response = wp_remote_get($url, $args);
+		
+		if (is_wp_error($response)) {
+			return $response;
+		}
+		
+		$code = wp_remote_retrieve_response_code($response);
+		if ($code !== 200) {
+			return new WP_Error('wjbfw_api_error', 'Workable API error: ' . $code);
+		}
+		
+		$body = wp_remote_retrieve_body($response);
+		$data = json_decode($body, true);
+		
+		if (!isset($data['jobs'])) {
+			break;
+		}
+		
+		// Merge jobs from this page
+		$all_jobs = array_merge($all_jobs, $data['jobs']);
+		
+		// Check for next page
+		$url = null;
+		if (isset($data['paging']['next']) && !empty($data['paging']['next'])) {
+			$url = $data['paging']['next'];
+		}
+	}
+	
+	// Cache the results for 5 minutes
+	set_transient('wjbfw_jobs_cache', $all_jobs, 5 * MINUTE_IN_SECONDS);
+	
+	return $all_jobs;
 }
 
 /**
  * Get a single job's details by shortcode from Workable
  */
-function wjb_get_job( $shortcode ) {
-	$subdomain = get_option('wjb_workable_subdomain', '');
-	$token = get_option('wjb_api_token', '');
+function wjbfw_get_job( $shortcode ) {
+	$subdomain = get_option('wjbfw_workable_subdomain', '');
+	$token = get_option('wjbfw_api_token', '');
 	$url = "https://www.workable.com/spi/v3/accounts/$subdomain/jobs/$shortcode";
 	$args = [
 		'headers' => [
@@ -43,7 +85,7 @@ function wjb_get_job( $shortcode ) {
 	$response = wp_remote_get( $url, $args );
 	if ( is_wp_error( $response ) ) return $response;
 	$code = wp_remote_retrieve_response_code( $response );
-	if ( $code !== 200 ) return new WP_Error( 'wjb_api_error', 'Workable API error: ' . $code );
+	if ( $code !== 200 ) return new WP_Error( 'wjbfw_api_error', 'Workable API error: ' . $code );
 	$body = wp_remote_retrieve_body( $response );
 	$data = json_decode( $body, true );
 	return $data;
@@ -52,9 +94,9 @@ function wjb_get_job( $shortcode ) {
 /**
  * Get the application form structure for a job from Workable
  */
-function wjb_get_application_form( $shortcode ) {
-	$subdomain = get_option('wjb_workable_subdomain', '');
-	$token = get_option('wjb_api_token', '');
+function wjbfw_get_application_form( $shortcode ) {
+	$subdomain = get_option('wjbfw_workable_subdomain', '');
+	$token = get_option('wjbfw_api_token', '');
 	$url = "https://www.workable.com/spi/v3/accounts/$subdomain/jobs/$shortcode/application_form";
 	$args = [
 		'headers' => [
@@ -66,7 +108,7 @@ function wjb_get_application_form( $shortcode ) {
 	$response = wp_remote_get( $url, $args );
 	if ( is_wp_error( $response ) ) return $response;
 	$code = wp_remote_retrieve_response_code( $response );
-	if ( $code !== 200 ) return new WP_Error( 'wjb_api_error', 'Workable API error: ' . $code );
+	if ( $code !== 200 ) return new WP_Error( 'wjbfw_api_error', 'Workable API error: ' . $code );
 	$body = wp_remote_retrieve_body( $response );
 	$data = json_decode( $body, true );
 	// Debug: Log the form structure
@@ -78,10 +120,10 @@ function wjb_get_application_form( $shortcode ) {
  * Submit a candidate application to Workable (with attachments)
  */
 
-function wjb_submit_application( $shortcode, $candidate, $files ) {
-	$subdomain = get_option('wjb_workable_subdomain', '');
-	$token = get_option('wjb_api_token', '');
-	$url = "https://tcp-software-1.workable.com/spi/v3/jobs/$shortcode/candidates";
+function wjbfw_submit_application( $shortcode, $candidate, $files ) {
+	$subdomain = get_option('wjbfw_workable_subdomain', '');
+	$token = get_option('wjbfw_api_token', '');
+	$url = "https://www.workable.com/spi/v3/accounts/$subdomain/jobs/$shortcode/candidates";
 
 	unset($candidate['shortcode'], $candidate['action'], $candidate['nonce']);
 
@@ -105,50 +147,47 @@ function wjb_submit_application( $shortcode, $candidate, $files ) {
 
 	$json_data = json_encode($data);
 
-// 	file_put_contents(__DIR__ . '/api_json_debug.txt', $json_data . "\n\n", FILE_APPEND);
+	// Use WordPress HTTP API instead of cURL
+	$args = [
+		'method' => 'POST',
+		'headers' => [
+			'Authorization' => 'Bearer ' . $token,
+			'Accept' => 'application/json',
+			'Content-Type' => 'application/json'
+		],
+		'body' => $json_data,
+		'timeout' => 30
+	];
 
-	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_URL, $url);
-	curl_setopt($ch, CURLOPT_POST, 1);
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	curl_setopt($ch, CURLOPT_POSTFIELDS, $json_data);
-	curl_setopt($ch, CURLOPT_HTTPHEADER, [
-		'Authorization: Bearer ' . $token,
-		'Accept: application/json',
-		'Content-Type: application/json'
-	]);
+	$response = wp_remote_post($url, $args);
 
-	$response = curl_exec($ch);
-	$err = curl_error($ch);
-	$status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-	curl_close($ch);
-
-// 	file_put_contents(__DIR__ . '/api_json_debug.txt', "Status: $status\nResponse: $response\nError: $err\n\n", FILE_APPEND);
-
-	if ($err) {
-		return new WP_Error('wjb_api_error', "cURL Error: $err");
+	if (is_wp_error($response)) {
+		return new WP_Error('wjbfw_api_error', 'HTTP Error: ' . $response->get_error_message());
 	}
 
+	$status = wp_remote_retrieve_response_code($response);
+	$body = wp_remote_retrieve_body($response);
+
 	if ($status < 200 || $status >= 300) {
-		$message = $response;
-		if ($decoded = json_decode($response, true)) {
+		$message = $body;
+		if ($decoded = json_decode($body, true)) {
 			if (isset($decoded['error'])) {
 				$message = $decoded['error'];
 			} elseif (isset($decoded['message'])) {
 				$message = $decoded['message'];
 			}
 		}
-		return new WP_Error('wjb_api_error', 'Workable API error: ' . $message);
+		return new WP_Error('wjbfw_api_error', 'Workable API error: ' . $message);
 	}
 
 	return true;
 }
 
 
-// function wjb_submit_application( $shortcode, $candidate, $files ) {
-// 	$subdomain = get_option('wjb_workable_subdomain', '');
-// 	$token = get_option('wjb_api_token', '');
-// 	$url = "https://tcp-software-1.workable.com/spi/v3/jobs/$shortcode/candidates";
+// function wjbfw_submit_application( $shortcode, $candidate, $files ) {
+// 	$subdomain = get_option('wjbfw_workable_subdomain', '');
+// 	$token = get_option('wjbfw_api_token', '');
+// 	$url = "https://www.workable.com/spi/v3/accounts/$subdomain/jobs/$shortcode/candidates";
 
 // 	unset($candidate['shortcode'], $candidate['action'], $candidate['nonce']);
 
@@ -189,7 +228,7 @@ function wjb_submit_application( $shortcode, $candidate, $files ) {
 // 	file_put_contents(__DIR__ . '/api_json_debug.txt', "Status: $status\nResponse: $response\nError: $err\n\n", FILE_APPEND);
 
 // 	if ($err) {
-// 		return new WP_Error('wjb_api_error', "cURL Error: $err");
+// 		return new WP_Error('wjbfw_api_error', "cURL Error: $err");
 // 	}
 
 // 	if ($status < 200 || $status >= 300) {
@@ -201,7 +240,7 @@ function wjb_submit_application( $shortcode, $candidate, $files ) {
 // 				$message = $decoded['message'];
 // 			}
 // 		}
-// 		return new WP_Error('wjb_api_error', 'Workable API error: ' . $message);
+// 		return new WP_Error('wjbfw_api_error', 'Workable API error: ' . $message);
 // 	}
 
 // 	return true;

@@ -1,5 +1,5 @@
 /* Department heading */
-.wjb-dept-title {
+.wjbfw-dept-title {
     margin-top: 2.5em;
     margin-bottom: 1em;
     font-size: 1.5em;
@@ -9,19 +9,19 @@
 }
 
 /* Job list (ul) */
-.single-content .wjb-job-list {
+.single-content .wjbfw-job-list {
     list-style: none;
     padding: 0 !important;
     margin-bottom: 0px;
 }
 
-li.wjb-job-item {
+li.wjbfw-job-item {
     padding: 1rem 0;
     border-bottom: 1px solid #e9e9e9;
 }
 
 /* Job title link */
-.wjb-job-item .wjb-view-detail-btn {
+.wjbfw-job-item .wjbfw-view-detail-btn {
     display: block;
     color: #1354c2;
     text-decoration: none;
@@ -30,14 +30,14 @@ li.wjb-job-item {
     transition: color 0.18s;
     margin-bottom: 0.1em;
 }
-.wjb-job-item .wjb-view-detail-btn:hover {
+.wjbfw-job-item .wjbfw-view-detail-btn:hover {
     color: #0c2b4e;
     text-decoration: underline;
 }
 
 /* Job location under title */
-.wjb-job-location {
-    color: #758398;
+.wjbfw-job-location {
+    color: #535353;
     font-size: 1em;
     margin-top: 4px;
     margin-bottom: 2px;
@@ -45,24 +45,24 @@ li.wjb-job-item {
 }
 
 /* Job detail panel */
-.wjb-job-detail-inner h2 {
+.wjbfw-job-detail-inner h2 {
     font-size: 1.45em;
     margin-bottom: 0.5em;
     color: #1d375a;
 }
-.wjb-job-desc {
+.wjbfw-job-desc {
     margin-bottom: 2em;
     color: #222e3a;
     line-height: 1.7;
 }
-.wjb-job-desc ul, .wjb-job-desc ol {
+.wjbfw-job-desc ul, .wjbfw-job-desc ol {
     margin: 0.6em 0 1em 1.4em;
 }
-.wjb-job-desc li {
+.wjbfw-job-desc li {
     margin-bottom: 0.4em;
 }
 
-.wjb-apply-btn {
+.wjbfw-apply-btn {
     display: inline-block;
     background: #246dff;
     color: #fff;
@@ -74,12 +74,12 @@ li.wjb-job-item {
     transition: background 0.15s;
     margin-top: 0.8em;
 }
-.wjb-apply-btn:hover {
+.wjbfw-apply-btn:hover {
     background: #02182e;
     color: #fff;
 }
 
-.wjb-back-to-list {
+.wjbfw-back-to-list {
     cursor: pointer;
     color: #1354c2;
     font-size: 1.05em;
@@ -89,27 +89,27 @@ li.wjb-job-item {
 }
 
 /* Filters container */
-.wjb-filters-container {
+.wjbfw-filters-container {
     display: flex;
     gap: 1.2em;
     align-items: flex-end;
     margin-bottom: 2em;
     flex-wrap: wrap;
 }
-#wjb-job-search {
+#wjbfw-job-search {
     font-size: 1em;
     padding: 0.45em 0.9em;
     border-radius: 6px;
     border: 1px solid #ced3dc;
     background: #fcfcfe;
 }
-#wjb-filter-department, #wjb-filter-location {
+#wjbfw-filter-department, #wjbfw-filter-location {
     font-size: 1em;
     padding: 0.45em 1.1em 0.45em 0.7em;
     border-radius: 6px;
     border: 1px solid #ced3dc;
 }
-div#wjb-job-filters {
+div#wjbfw-job-filters {
     display: flex;
     gap: 1rem;
     align-items: flex-start;
@@ -119,7 +119,7 @@ div#wjb-job-filters {
     margin: 1rem auto;
 }
 
-div#wjb-job-filters :is(select, input) {
+div#wjbfw-job-filters :is(select, input) {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
@@ -135,9 +135,22 @@ div#wjb-job-filters :is(select, input) {
     line-height: 2;
 }
 
+.wjbfw-disabled{
+    opacity:0.5;
+    pointer-events:none; 
+}
+
+.screen-reader-text {
+    position: absolute;
+    width: 1px; height: 1px;
+    margin: -1px; padding: 0; border: 0;
+    overflow: hidden; clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
 /* Application Form Styles */
 
-#wjb-application-form-container {
+#wjbfw-application-form-container {
     max-width: 1280px;
     margin: 2em 0;
     background: #fff;
@@ -147,34 +160,34 @@ div#wjb-job-filters :is(select, input) {
 }
 
 /* The form itself */
-#wjb-application-form {
+#wjbfw-application-form {
     display: flex;
     flex-direction: column;
     gap: 1em;
 }
 
 /* Individual form field */
-#wjb-application-form .wjb-field {
+#wjbfw-application-form .wjbfw-field {
     display: flex;
     flex-direction: column;
     gap: 0.42em;
     margin-bottom: 0.5em;
 }
 
-.wjb-field br {
+.wjbfw-field br {
     display: none;
 }
 
-#wjb-application-form label {
+#wjbfw-application-form label {
     font-weight: 500;
     font-size: 1.09em;
     color: #1a3354;
     margin-bottom: 0.08em;
 }
 
-#wjb-application-form input[type="text"],
-#wjb-application-form input[type="email"],
-#wjb-application-form input[type="file"] {
+#wjbfw-application-form input[type="text"],
+#wjbfw-application-form input[type="email"],
+#wjbfw-application-form input[type="file"] {
     font-size: 1em;
     padding: 0.55em 0.88em;
     border-radius: 7px;
@@ -183,7 +196,7 @@ div#wjb-job-filters :is(select, input) {
     margin-top: 0.04em;
 }
 
-#wjb-application-form input[type="file"] {
+#wjbfw-application-form input[type="file"] {
     background: #f6f8fc;
     padding: 0.43em 0.7em;
     font-size: 1em;
@@ -191,7 +204,7 @@ div#wjb-job-filters :is(select, input) {
     border-radius: 7px;
 }
 
-#wjb-application-form small {
+#wjbfw-application-form small {
     color: #687790;
     font-size: 0.98em;
     margin-top: 0.2em;
@@ -199,7 +212,7 @@ div#wjb-job-filters :is(select, input) {
 }
 
 /* Submit button */
-#wjb-application-form button[type="submit"] {
+#wjbfw-application-form button[type="submit"] {
 	max-width: 256px;
     display: inline-block;
     background: #246dff;
@@ -213,12 +226,12 @@ div#wjb-job-filters :is(select, input) {
     transition: background 0.15s;
     margin-top: 0.8em;
 }
-#wjb-application-form button[type="submit"]:hover {
+#wjbfw-application-form button[type="submit"]:hover {
     background: #02182e;
     color: #fff;
 }
 
-#wjb-application-form .wjb-form-msg {
+#wjbfw-application-form .wjbfw-form-msg {
     margin-top: 1.1em;
     font-size: 1.02em;
     color: #126d2f;
@@ -227,18 +240,18 @@ div#wjb-job-filters :is(select, input) {
 
 /* Responsive for mobile */
 @media (max-width: 650px) {
-    .wjb-filters-container {
+    .wjbfw-filters-container {
         flex-direction: column;
         gap: 0.7em;
         align-items: stretch;
     }
-    #wjb-job-detail {
+    #wjbfw-job-detail {
         padding: 1.2em 0.5em;
     }
 }
 
 @media (max-width: 600px) {
-    #wjb-application-form-container {
+    #wjbfw-application-form-container {
         padding: 1.1em 0.5em 1em 0.5em;
         max-width: 98vw;
     }
